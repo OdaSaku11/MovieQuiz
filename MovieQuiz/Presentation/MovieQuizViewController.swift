@@ -15,6 +15,7 @@ final class MovieQuizViewController: UIViewController {
     }
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
+    private var isAnswerProcessing = false
     private let questions: [QuizQuestion] = [
         QuizQuestion(
             image: "The Godfather",
@@ -58,6 +59,8 @@ final class MovieQuizViewController: UIViewController {
             correctAnswer: false)
     ]
     private func showAnswerResult(isCorrect: Bool) {
+        guard !isAnswerProcessing else {return}
+        isAnswerProcessing = true
         if isCorrect {
             correctAnswers += 1
         }
@@ -67,7 +70,9 @@ final class MovieQuizViewController: UIViewController {
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.imageView.layer.borderWidth = 0
             self.showNextQuestionOrResults()
+            self.isAnswerProcessing = false
         }
     }
     private func showNextQuestionOrResults() {
@@ -95,6 +100,9 @@ final class MovieQuizViewController: UIViewController {
         let action = UIAlertAction(title: result.buttonText, style: .default) { _ in
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
+            self.isAnswerProcessing = false
+            
+            self.imageView.layer.borderWidth = 0
             
             let firstQuestion = self.questions[self.currentQuestionIndex]
             let viewModel = self.convert(model: firstQuestion)
@@ -114,9 +122,6 @@ final class MovieQuizViewController: UIViewController {
         counterLabel.text = step.questionNumber
         
     }
-    
-    
-    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         let firstQuestion = questions[currentQuestionIndex]
@@ -147,6 +152,9 @@ final class MovieQuizViewController: UIViewController {
         let buttonText: String
     }
     
+    // MARK: - Lifecycle
+    
+
     
     /*
      Mock-данные
